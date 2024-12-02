@@ -160,6 +160,7 @@ def notify_activities(config):
         current_day_th = days_mapping[current_day]
 
         # Clear คอนโซลเมื่อถึงนาที 00
+        current_minute = now.strftime("%M")
         if current_minute == "00":
             print(f"[DEBUG] Clearing console at hour {now.strftime('%H')}:00")
             clear_os()

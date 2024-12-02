@@ -2,6 +2,8 @@ import time
 import requests
 import datetime
 import pytz
+import os
+
 
 # คอนฟิกต่าง ๆ
 config = {
@@ -48,6 +50,12 @@ config = {
         }
     ]
 }
+
+
+# ฟังก์ชันสำหรับเคลียร์คอนโซล
+def clear_os():
+    os.system('clear')
+
 
 # ฟังก์ชันส่งข้อความ
 def push_msg(group_id, message, access_token, image_url=None):
@@ -150,6 +158,11 @@ def notify_activities(config):
             "Sunday": "วันอาทิตย์"
         }
         current_day_th = days_mapping[current_day]
+
+        # Clear คอนโซลเมื่อถึงนาที 00
+        if current_minute == "00":
+            print(f"[DEBUG] Clearing console at hour {now.strftime('%H')}:00")
+            clear_os()
         
         # ทำความสะอาดรายการแจ้งเตือน
         now = datetime.datetime.now(timezone)

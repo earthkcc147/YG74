@@ -183,15 +183,15 @@ def notify_activities(config):
         for activity in config['activities']:
             print(f"[DEBUG] Checking Activity: {activity['name']}")
             
-            # ตรวจสอบการแจ้งเตือนล่วงหน้า 5 นาที
+            # ตรวจสอบการแจ้งเตือนล่วงหน้า 10 นาที
             for time_str in activity['times']:
                 activity_time = datetime.datetime.strptime(time_str, "%H:%M").time()
-                early_time = (datetime.datetime.combine(datetime.date.today(), activity_time) - datetime.timedelta(minutes=5)).time()
+                early_time = (datetime.datetime.combine(datetime.date.today(), activity_time) - datetime.timedelta(minutes=10)).time()
                 
                 if current_time == early_time.strftime("%H:%M"):
                     if current_time not in [t.strftime("%H:%M") for t in notified_early_times]:
                         if 'ทุกวัน' in activity['days'] or current_day_th in activity['days']:
-                            message = f"⏰ ใกล้ถึงเวลา: {activity['name']} ในอีก 5 นาที!\nรายละเอียด: {activity['details']}"
+                            message = f"⏰ เตรียมตัวให้พร้อมใกล้ถึงเวลา: {activity['name']} ในอีก 10 นาที!\nรายละเอียด: {activity['details']}"
                             # ไม่ต้องใส่ image_url สำหรับการแจ้งเตือนล่วงหน้า
                             push_msg(config['groupId'], message, config['accessToken'])
                             # push_msg(config['groupId'], message, config['accessToken'], activity['image_url'])

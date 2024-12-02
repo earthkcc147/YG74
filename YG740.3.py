@@ -192,7 +192,9 @@ def notify_activities(config):
                     if current_time not in [t.strftime("%H:%M") for t in notified_early_times]:
                         if 'ทุกวัน' in activity['days'] or current_day_th in activity['days']:
                             message = f"⏰ ใกล้ถึงเวลา: {activity['name']} ในอีก 5 นาที!\nรายละเอียด: {activity['details']}"
-                            push_msg(config['groupId'], message, config['accessToken'], activity['image_url'])
+                            # ไม่ต้องใส่ image_url สำหรับการแจ้งเตือนล่วงหน้า
+                            push_msg(config['groupId'], message, config['accessToken'])
+                            # push_msg(config['groupId'], message, config['accessToken'], activity['image_url'])
                             print(f"[DEBUG] Sending early notification for activity: {activity['name']}")
                             notified_early_times.append(now)
 

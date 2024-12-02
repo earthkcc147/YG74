@@ -119,11 +119,7 @@ def notify_all_activities(config, current_time):
             for activity in activities_today:
                 print(f"[DEBUG] Adding activity: {activity['name']} for today.")
                 message += f"\n🎯 {activity['name']}\n{activity['details']}\n"
-                image_url = activity.get('image_url', '')  # ดึง image_url จากกิจกรรม
-                # ถ้ามี image_url ให้เพิ่มลงในข้อความ
-                if image_url:
-                    message += f"📸 {image_url}\n"
-            push_msg(config['groupId'], message, config['accessToken'], image_url)
+            push_msg(config['groupId'], message, config['accessToken'])
             print("[DEBUG] Today's activities notified successfully.")
         else:
             print("[DEBUG] No activities scheduled for today.")

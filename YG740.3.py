@@ -207,16 +207,18 @@ def notify_activities(config):
                         print(f"[DEBUG] Sending notification for activity: {activity['name']}")
                         notified_times.append(now)
             
-            # แจ้งเตือนกิจกรรมสิ้นสุด
-            if current_time in activity.get('end_times', []):
-                if current_time not in [t.strftime("%H:%M") for t in ended_times]:
-                    print(f"[DEBUG] Activity {activity['name']} has ended at {current_time}. Sending notification.")
-                    message = f"⏰ กิจกรรม: {activity['name']} ได้สิ้นสุดลงแล้ว\n💡 ขอบคุณที่เข้าร่วม!"
-                    push_msg(config['groupId'], message, config['accessToken'])
-                    ended_times.append(now)
+
+            if 'ทุกวัน' in activity['days'] or current_day_th in activity['days']:
+                    if current_time not in [t.strftime("%H:%M") for t in ended_times]:
+                        print(f"[DEBUG] Activity {activity['name']} has ended at {current_time}. Sending notification.")
+                        message = f"⏰ กิจกรรม: {activity['name']} ได้สิ้นสุดลงแล้ว\n💡 ขอบคุณที่เข้าร่วม!"
+                        push_msg(config['groupId'], message, config['accessToken'])
+                        ended_times.append(now)
 
         print("----- END DEBUG ROUND -----")
-        time.sleep(60)
+        time.sleep(60)  # หน่วงเวลา 1 นาที
+
+            
 
 # เริ่มการแจ้งเตือน
 notify_activities(config)

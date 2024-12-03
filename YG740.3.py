@@ -164,7 +164,7 @@ def notify_activities(config):
         if current_minute == "00":
             print(f"[DEBUG] Clearing console at hour {now.strftime('%H')}:00")
             clear_os()
-        
+
         # ทำความสะอาดรายการแจ้งเตือน
         now = datetime.datetime.now(timezone)
         notified_times = [t for t in notified_times if now - t < datetime.timedelta(hours=24)]
@@ -182,12 +182,12 @@ def notify_activities(config):
 
         for activity in config['activities']:
             print(f"[DEBUG] Checking Activity: {activity['name']}")
-            
+
             # ตรวจสอบการแจ้งเตือนล่วงหน้า 10 นาที
             for time_str in activity['times']:
                 activity_time = datetime.datetime.strptime(time_str, "%H:%M").time()
                 early_time = (datetime.datetime.combine(datetime.date.today(), activity_time) - datetime.timedelta(minutes=10)).time()
-                
+
                 if current_time == early_time.strftime("%H:%M"):
                     if current_time not in [t.strftime("%H:%M") for t in notified_early_times]:
                         if 'ทุกวัน' in activity['days'] or current_day_th in activity['days']:
@@ -206,19 +206,30 @@ def notify_activities(config):
                         push_msg(config['groupId'], message, config['accessToken'], activity['image_url'])
                         print(f"[DEBUG] Sending notification for activity: {activity['name']}")
                         notified_times.append(now)
-            
 
-            if 'ทุกวัน' in activity['days'] or current_day_th in activity['days']:
-                    if current_time not in [t.strftime("%H:%M") for t in ended_times]:
-                        print(f"[DEBUG] Activity {activity['name']} has ended at {current_time}. Sending notification.")
-                        message = f"⏰ กิจกรรม: {activity['name']} ได้สิ้นสุดลงแล้ว\n💡 ขอบคุณที่เข้าร่วม!"
-                        push_msg(config['groupId'], message, config['accessToken'])
-                        ended_times.append(now)
+
+            # แจ้งเตือนกิจกรรมสิ้นสุด
+            if current_time in activity.get('end_times', []):
+                if (current_time not in [t.strftime("%H:%M") for t in ended_times] and 
+                    ('ทุกวัน' in activity['days'] or current_day_th in activity['days'])):
+                    print(f"[DEBUG] Activity {activity['name']} has ended at {current_time}. Sending notification.")
+                    message = f"⏰ กิจกรรม: {activity['name']} ได้สิ้นสุดลงแล้ว\n💡 ขอบคุณที่เข้าร่วม!"
+                    push_msg(config['groupId'], message, config['accessToken'], activity['image_url'])
+                    ended_times.append(now)
+
 
         print("----- END DEBUG ROUND -----")
-        time.sleep(60)  # หน่วงเวลา 1 นาที
-
-            
+        time.sleep(60)
 
 # เริ่มการแจ้งเตือน
 notify_activities(config)
+
+
+
+
+
+
+
+
+
+ปรับให้มีการตรวจสอบวันที่ตรงกับกิจกรรม ของการแจ้งเตือนกิจกรรมสิ้นสุด

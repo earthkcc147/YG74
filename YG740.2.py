@@ -2,6 +2,8 @@ import time
 import requests
 import datetime
 import pytz
+import os
+
 
 # คอนฟิกต่าง ๆ
 config = {
@@ -49,6 +51,12 @@ config = {
     ]
 }
 
+
+# ฟังก์ชันสำหรับเคลียร์คอนโซล
+def clear_os():
+    os.system('clear')
+
+
 # ฟังก์ชันส่งข้อความ
 def push_msg(group_id, message, access_token, image_url=None):
     try:
@@ -92,7 +100,7 @@ def notify_all_activities(config, current_time):
         print("[DEBUG] Preparing to notify activities for today.")
         # กำหนดข้อความเริ่มต้น
         message = "🔥 กิจกรรมวันนี้ 🔥\n"
-        
+
         # ดึงข้อมูลวันปัจจุบัน
         timezone = pytz.timezone("Asia/Bangkok")
         now = datetime.datetime.now(timezone)
@@ -119,9 +127,7 @@ def notify_all_activities(config, current_time):
             for activity in activities_today:
                 print(f"[DEBUG] Adding activity: {activity['name']} for today.")
                 message += f"\n🎯 {activity['name']}\n{activity['details']}\n"
-                # ส่งข้อความก่อน แล้วค่อยส่งภาพ
-                push_msg(config['groupId'], message, config['accessToken'])
-                push_msg(config['groupId'], "", config['accessToken'], activity['image_url'])  # ส่งภาพหลังข้อความ
+            push_msg(config['groupId'], message, config['accessToken'])
             print("[DEBUG] Today's activities notified successfully.")
         else:
             print("[DEBUG] No activities scheduled for today.")
@@ -152,7 +158,13 @@ def notify_activities(config):
             "Sunday": "วันอาทิตย์"
         }
         current_day_th = days_mapping[current_day]
-        
+
+        # Clear คอนโซลเมื่อถึงนาที 00
+        current_minute = now.strftime("%M")
+        if current_minute == "00":
+            print(f"[DEBUG] Clearing console at hour {now.strftime('%H')}:00")
+            clear_os()
+
         # ทำความสะอาดรายการแจ้งเตือน
         now = datetime.datetime.now(timezone)
         notified_times = [t for t in notified_times if now - t < datetime.timedelta(hours=24)]
@@ -170,17 +182,19 @@ def notify_activities(config):
 
         for activity in config['activities']:
             print(f"[DEBUG] Checking Activity: {activity['name']}")
-            
-            # ตรวจสอบการแจ้งเตือนล่วงหน้า 5 นาที
+
+            # ตรวจสอบการแจ้งเตือนล่วงหน้า 10 นาที
             for time_str in activity['times']:
                 activity_time = datetime.datetime.strptime(time_str, "%H:%M").time()
-                early_time = (datetime.datetime.combine(datetime.date.today(), activity_time) - datetime.timedelta(minutes=5)).time()
-                
+                early_time = (datetime.datetime.combine(datetime.date.today(), activity_time) - datetime.timedelta(minutes=10)).time()
+
                 if current_time == early_time.strftime("%H:%M"):
                     if current_time not in [t.strftime("%H:%M") for t in notified_early_times]:
                         if 'ทุกวัน' in activity['days'] or current_day_th in activity['days']:
-                            message = f"⏰ ใกล้ถึงเวลา: {activity['name']} ในอีก 5 นาที!\nรายละเอียด: {activity['details']}"
-                            push_msg(config['groupId'], message, config['accessToken'], activity['image_url'])
+                            message = f"⏰ เตรียมตัวให้พร้อมใกล้ถึงเวลา: {activity['name']} ในอีก 10 นาที!\nรายละเอียด: {activity['details']}"
+                            # ไม่ต้องใส่ image_url สำหรับการแจ้งเตือนล่วงหน้า
+                            push_msg(config['groupId'], message, config['accessToken'])
+                            # push_msg(config['groupId'], message, config['accessToken'], activity['image_url'])
                             print(f"[DEBUG] Sending early notification for activity: {activity['name']}")
                             notified_early_times.append(now)
 
@@ -192,7 +206,7 @@ def notify_activities(config):
                         push_msg(config['groupId'], message, config['accessToken'], activity['image_url'])
                         print(f"[DEBUG] Sending notification for activity: {activity['name']}")
                         notified_times.append(now)
-            
+
             # แจ้งเตือนกิจกรรมสิ้นสุด
             if current_time in activity.get('end_times', []):
                 if current_time not in [t.strftime("%H:%M") for t in ended_times]:
@@ -206,3 +220,11 @@ def notify_activities(config):
 
 # เริ่มการแจ้งเตือน
 notify_activities(config)
+
+
+
+
+
+
+
+
